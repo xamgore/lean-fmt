@@ -762,12 +762,14 @@ private unsafe def skeletonRead (setup : Lean.ModuleSetup) (source : String)
     unless changesParsing stx do
       continue
     -- The frontend owns the toolchain-specific call to elabCommandTopLevel.
-    let next? ← try
-      let (_, next) ←
-        (Lean.Elab.Frontend.elabCommandAtFrontend stx { inputCtx := input }).run
-          { commandState := state, parserState, cmdPos := commandPos }
-      pure (some next.commandState)
-    catch _ => pure none
+    let next? ←
+      try
+        let (_, next) ←
+          (Lean.Elab.Frontend.elabCommandAtFrontend stx { inputCtx := input }).run
+              { commandState := state, parserState, cmdPos := commandPos }
+        pure (some next.commandState)
+      catch _ =>
+        pure none
     match next? with
     | some next =>
       if next.messages.hasErrors then
